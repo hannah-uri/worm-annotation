@@ -2,8 +2,8 @@
 #tests maker on wormbase data
 
 mkdir ref
-wget -P ref/ "ftp://ftp.wormbase.org/pub/wormbase/releases/WS274/species/c_elegans/PRJEB28388/c_elegans.PRJEB28388.WS274.genomic.fa.gz"
-wget -P ref/ "ftp://ftp.wormbase.org/pub/wormbase/releases/WS274/species/c_elegans/PRJEB28388/c_elegans.PRJEB28388.WS274.mRNA_transcripts.fa.gz"
+wget -P ref/ "ftp://ftp.wormbase.org/pub/wormbase/releases/WS270/species/c_elegans/PRJEB28388/c_elegans.PRJEB28388.WS270.genomic.fa.gz"
+wget -P ref/ "ftp://ftp.wormbase.org/pub/wormbase/releases/WS270/species/c_elegans/PRJEB28388/c_elegans.PRJEB28388.WS270.mRNA_transcripts.fa.gz"
 gunzip ref/c_elegans.PRJEB28388.WS274.genomic.fa.gz
 gunzip ref/c_elegans.PRJEB28388.WS274.mRNA_transcripts.fa.gz
 
