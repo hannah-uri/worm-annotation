@@ -113,7 +113,7 @@ rule count_trnas:
 	output:
 		'output/plots/trna/tRNA-counts_{type}_r{replicate}.tsv'
 	script:
-		'pycharm/worms/radial-tRNA-counter.py'
+		'scripts/radial-tRNA-counter.py'
 
 rule plot_trnas:
 	input:
@@ -123,7 +123,7 @@ rule plot_trnas:
 	params:
 		transformation='log2'
 	script:
-		'pycharm/worms/radial_plot.R'
+		'scripts/radial_plot.R'
 
 rule trinity:
 	input:
