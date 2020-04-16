@@ -3,18 +3,18 @@ STRAINS_WITH_RNA_R1 = ['altadena', 'amares', 'auckland', 'bristol', 'hermanville
 
 rule all:
 	input:
-		'output/plots/trna/tRNA-counts_small-rna_5-indep_r1.png',
-		'output/plots/trna/tRNA-counts_rna_r1.png',
-		'output/maker/auckland',
-		'output/maker/altadena',
-		'output/maker/amares',
-		'output/maker/bristol',
-		'output/maker/hermanville',
-		'output/maker/lake-forest-park',
-		'output/maker/lisbon',
-		'output/maker/madagascar',
-		'output/maker/roxel',
-		'output/maker/salt-lake-city'
+		#'output/plots/trna/tRNA-counts_small-rna_5-indep_r1.png',
+		#'output/plots/trna/tRNA-counts_rna_r1.png',
+		'output/summary/auckland.png',
+		'output/summary/altadena.png',
+		'output/summary/amares.png',
+		'output/summary/bristol.png',
+		#'output/maker/hermanville',
+		#'output/maker/lake-forest-park',
+		#'output/maker/lisbon',
+		#'output/maker/madagascar',
+		#'output/maker/roxel',
+		#'output/maker/salt-lake-city'
 
 rule prep_ref_genome:
 	output:
@@ -75,7 +75,7 @@ rule trim_rna:
 		4
 	shell:
 		'mkdir -p output/cutadapt/{wildcards.strain};'
-		'cutadapt -b file:input/adaptors/truseq.fa {input} -u 10 -u -2 -j --max-n 0.5 --minimum-length 25 {threads} > {output.file} 2> {output.log}'
+		'cutadapt -b file:input/adaptors/truseq.fa {input} -u 10 -u -2 -j {threads} --max-n 0.5 --minimum-length 25 > {output.file} 2> {output.log}'
 
 rule allign:
 	input:
@@ -156,7 +156,9 @@ rule rep_mask:
 	conda:
 		'envs/windowmasker.yml'
 	shell:
-		'windowmasker -in {input.genome} -ustat {input.counts} -out {output} -outfmt fasta -parse_seqids'
+		'windowmasker -in {input.genome} -ustat {input.counts} -out {output}.tmp -outfmt fasta -parse_seqids;'
+		"cat {output}.tmp | sed 's/>lcl\|chrI_pilon/I' | sed 's/>lcl\|chrII_pilon/II' | sed 's/>lcl\|chrIII_pilon/III' | sed 's/>lcl\|chrIV_pilon/IV' | sed 's/>lcl\|chrV_pilon/V' | sed 's/>lcl\|chrX_pilon/X' > {output};"
+		'rm {output}.tmp'
 
 rule maker:
 	input:
@@ -172,5 +174,29 @@ rule maker:
 		'maker -CTL;'
 		"cat maker_opts.ctl | sed 's/^genome=.*$/\genome=\.\.\/\.\.\/\.\.\/output\/windowmasker\/{wildcards.strain}\/{wildcards.strain}_masked.fa /' | sed 's/^est=.*$/est=\.\.\/\.\.\/trinity\/{wildcards.strain}\/trinity_out_dir\/Trinity.fasta /' | sed 's/^model_org=.*$/model_org= /' | sed 's/^est2genome=.*$/est2genome=1 /' > maker_opts.ctl.2;"
 		'mv maker_opts.ctl.2 maker_opts.ctl;'
-		'maker -old_struct -qq'
-		
+		'maker -qq'
+
+rule collect_gffs:
+	# collects the scattered outputs of maker into a single file and trims the fasta sequence from the end 
+	input:
+		'output/maker/{strain}'
+	output:
+		'output/annotations/{strain}.gff'
+	shell:
+		"echo '##gff-version 3' > {output};"
+		"cat {input}/*/*/*/*/*/*[^IXV]chrI[^IXV]*.gff | sed '1,/^##FASTA/!d' | sed '/^#/d' > {output}.I.tmp;"
+		"cat {input}/*/*/*/*/*/*[^IXV]chrII[^IXV]*.gff | sed '1,/^##FASTA/!d' | sed '/^#/d' > {output}.II.tmp;"
+		"cat {input}/*/*/*/*/*/*[^IXV]chrIII[^IXV]*.gff | sed '1,/^##FASTA/!d' | sed '/^#/d' > {output}.III.tmp;"
+		"cat {input}/*/*/*/*/*/*[^IXV]chrIV[^IXV]*.gff | sed '1,/^##FASTA/!d' | sed '/^#/d' > {output}.IV.tmp;"
+		"cat {input}/*/*/*/*/*/*[^IXV]chrV[^IXV]*.gff | sed '1,/^##FASTA/!d' | sed '/^#/d' > {output}.V.tmp;"
+		"cat {input}/*/*/*/*/*/*[^IXV]chrX[^IXV]*.gff | sed '1,/^##FASTA/!d' | sed '/^#/d' > {output}.X.tmp;"
+		"cat {output}.I.tmp {output}.II.tmp {output}.III.tmp {output}.IV.tmp {output}.V.tmp {output}.X.tmp >> {output};"
+		"rm {output}*.tmp"
+
+rule summarise:
+	input:
+		'output/annotations/{strain}.gff'
+	output:
+		'output/summary/{strain}.png'
+	script:
+		'scripts/maker-analysis.R'
