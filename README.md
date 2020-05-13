@@ -12,4 +12,5 @@ To run, install [Conda](https://docs.conda.io/en/latest/) and [Snakemake](https:
 
     snakemake --use-conda
 
+![rulegraph](https://raw.githubusercontent.com/hannah-uri/worm-annotation/master/rulegraph.svg)
 ![DAG](https://raw.githubusercontent.com/hannah-uri/worm-annotation/master/dag.svg)
