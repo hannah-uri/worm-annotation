@@ -11,3 +11,5 @@ Genomes and RNA-seq read files must be supplied in a directory structure as foll
 To run, install [Conda](https://docs.conda.io/en/latest/) and [Snakemake](https://snakemake.readthedocs.io/en/stable/), then run:
 
     snakemake --use-conda
+
+![DAG](https://raw.githubusercontent.com/hannah-uri/worm-annotation/master/dag.svg)
